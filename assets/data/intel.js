@@ -9,6 +9,6 @@ window.INTEL = [
     title: "Prepare for Escape",
     date: "2026-09-22",
     tag: "Track breakdown",
-    excerpt: "The remix that started the project: a Geneburn retake named after the four words on a loading screen I have seen far too many times."
+    excerpt: "The remix that started the project, and the feeling of loading into a raid you might not walk out of."
   }
 ];
