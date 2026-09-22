@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>exfilcamper01 — dark dubstep for the raid</title>
+<meta name="description" content="exfilcamper01 writes dark, sinister riddim and darkstep built out of Escape from Tarkov raids. Deploy in and listen to Prepare for Escape.">
+<meta name="theme-color" content="#07080a">
+<link rel="canonical" href="https://exfilcamper01.vercel.app/">
+<meta property="og:type" content="music.song">
+<meta property="og:title" content="exfilcamper01 — Prepare for Escape">
+<meta property="og:description" content="Dark, sinister dubstep built out of Escape from Tarkov raids. Headphones on. Deploy.">
+<meta property="og:image" content="https://exfilcamper01.vercel.app/assets/img/og.jpg">
+<meta property="og:url" content="https://exfilcamper01.vercel.app/">
+<meta property="music:musician" content="https://soundcloud.com/cargoelevatorclutch">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/stencil.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/img/elevator-poster.jpg" as="image">
+<link rel="preconnect" href="https://w.soundcloud.com">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"MusicGroup","@id":"https://exfilcamper01.vercel.app/#artist","name":"exfilcamper01","alternateName":"zero","genre":["Dubstep","Riddim","Darkstep"],
+  "url":"https://exfilcamper01.vercel.app/","sameAs":["https://soundcloud.com/cargoelevatorclutch","https://soundcloud.com/iamzeroofficial"],
+  "email":"brandon@digitalhorizon.dev"},
+ {"@type":"MusicRecording","name":"prepare for escape/hermedic retake - geneburn (exfilcamper01 remix)","byArtist":{"@id":"https://exfilcamper01.vercel.app/#artist"},
+  "duration":"PT3M25S","genre":"Dubstep","datePublished":"2023-11-28","url":"https://soundcloud.com/cargoelevatorclutch/prepare-for-escapehermedic-retake-geneburn-exfilcamper01-remix"},
+ {"@type":"MusicRecording","name":"single player games","byArtist":{"@id":"https://exfilcamper01.vercel.app/#artist"},
+  "duration":"PT3M23S","genre":"Dubstep","datePublished":"2024-08-02","url":"https://soundcloud.com/iamzeroofficial/singleplayergames"}
+]}
+</script>
+</head>
+<body class="is-gated">
+
+<!-- ═══════════ DEPLOY GATE ═══════════ -->
+<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <img class="gate-bg" src="/assets/img/elevator-poster.jpg" alt="" aria-hidden="true">
+  <canvas id="gate-noise" aria-hidden="true"></canvas>
+  <div class="gate-inner">
+    <p class="gate-kicker">RAID 01 · <span id="gate-clock">--:--:--</span> LOCAL</p>
+    <h1 id="gate-title" class="gate-title" data-text="EXFILCAMPER01">EXFILCAMPER01</h1>
+    <ol class="gate-log" aria-live="polite">
+      <li data-step="fonts"><span class="k">LOADING GEAR</span><span class="dots"></span><span class="v">…</span></li>
+      <li data-step="intel"><span class="k">READING RAID INTEL</span><span class="dots"></span><span class="v">…</span></li>
+      <li data-step="link"><span class="k">CONNECTING TO SOUNDCLOUD</span><span class="dots"></span><span class="v">…</span></li>
+    </ol>
+    <button id="deploy" class="deploy" disabled>
+      <span class="deploy-fill" aria-hidden="true"></span>
+      <span class="deploy-label">DEPLOY</span>
+      <span class="deploy-sub">sound on · headphones recommended</span>
+    </button>
+    <p class="gate-hint">press <kbd>ENTER</kbd> or click · <button id="enter-silent" class="linkish">enter without audio</button></p>
+  </div>
+  <div class="gate-shutter top" aria-hidden="true"></div>
+  <div class="gate-shutter bottom" aria-hidden="true"></div>
+</div>
+
+<!-- ═══════════ HUD HEADER ═══════════ -->
+<header class="hud" id="hud">
+  <a class="brand" href="#raid" aria-label="exfilcamper01 home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">EXFILCAMPER01</span>
+  </a>
+  <nav class="nav" aria-label="Primary">
+    <a href="#raid"><i>01</i>Raid</a>
+    <a href="#stash"><i>02</i>Stash</a>
+    <a href="#dossier"><i>03</i>Dossier</a>
+    <a href="#intel"><i>04</i>Intel</a>
+    <a href="#comms"><i>05</i>Comms</a>
+  </nav>
+  <div class="hud-stats" title="Stored in this browser only">
+    <span><b id="stat-raids">0</b> raids survived</span>
+    <span><b id="stat-time">00:00:00</b> in raid</span>
+  </div>
+</header>
+
+<main>
+<!-- ═══════════ HERO / RAID ═══════════ -->
+<section id="raid" class="raid" aria-label="Featured track player">
+  <video id="bgvid" class="raid-bg" muted playsinline loop autoplay preload="auto" poster="/assets/img/elevator-poster.jpg" aria-hidden="true">
+    <source src="/assets/video/elevator.mp4" type="video/mp4">
+  </video>
+  <canvas id="viz" aria-hidden="true"></canvas>
+  <div class="raid-vignette" aria-hidden="true"></div>
+
+  <div class="raid-grid">
+    <div class="raid-left">
+      <img class="now-art" id="now-art" src="/assets/img/prepare-for-escape.jpg" alt="Artwork for Prepare for Escape" width="88" height="88">
+      <p class="eyebrow"><span class="rec"></span><span id="now-state">STANDING BY</span> · <span id="now-account">exfilcamper01</span></p>
+      <h2 class="raid-title glitch" id="now-title" data-text="Prepare for Escape">Prepare for Escape</h2>
+      <p class="raid-credit" id="now-credit">Geneburn — Hermedic Retake · exfilcamper01 remix</p>
+      <ul class="raid-tags" id="now-tags"></ul>
+    </div>
+
+    <div class="raid-core" id="raid-core" aria-hidden="true"></div>
+
+    <div class="raid-right">
+      <div class="readout">
+        <span class="readout-k">RAID TIME</span>
+        <span class="readout-v" id="raid-timer">03:24</span>
+        <span class="readout-bar"><i id="raid-bar"></i></span>
+      </div>
+      <div class="readout small">
+        <span class="readout-k">NEXT IMPACT</span>
+        <span class="readout-v" id="next-impact">—</span>
+      </div>
+      <div class="readout small">
+        <span class="readout-k">SOUNDCLOUD</span>
+        <span class="readout-v"><span id="now-plays">—</span> plays · <span id="now-likes">—</span> likes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="deck" id="deck">
+    <div class="deck-controls">
+      <button class="btn-icon" id="btn-prev" aria-label="Previous track"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="btn-play" id="btn-play" aria-label="Play"><svg class="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg><svg class="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>
+      <button class="btn-icon" id="btn-next" aria-label="Next track"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <button class="btn-impact" id="btn-impact">SKIP TO IMPACT <kbd>D</kbd></button>
+    </div>
+    <div class="scrub" id="scrub" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <canvas id="scrub-canvas"></canvas>
+      <div class="scrub-markers" id="scrub-markers"></div>
+      <span class="scrub-hover" id="scrub-hover"></span>
+    </div>
+    <div class="deck-meta">
+      <span class="time"><b id="t-cur">0:00</b> / <span id="t-dur">3:24</span></span>
+      <label class="vol"><span>VOL</span><input type="range" id="vol" min="0" max="100" value="85" aria-label="Volume"></label>
+      <a class="sc-attr" id="sc-link" href="https://soundcloud.com/cargoelevatorclutch/prepare-for-escapehermedic-retake-geneburn-exfilcamper01-remix" target="_blank" rel="noopener">Streaming via SoundCloud ↗</a>
+    </div>
+  </div>
+
+  <a href="#stash" class="scroll-cue" aria-label="Scroll to the stash"><span>LOOT BELOW</span><i></i></a>
+</section>
+
+<!-- live ticker — real tags only -->
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+
+<!-- ═══════════ STASH ═══════════ -->
+<section id="stash" class="section stash">
+  <header class="sec-head">
+    <p class="sec-num">02</p>
+    <h2 class="sec-title" data-scramble>STASH</h2>
+    <p class="sec-sub"><b id="stash-count">2</b> items found · every empty slot is an unreleased track. Click an item to load it into the raid.</p>
+  </header>
+  <div class="stash-wrap">
+    <div class="stash-grid" id="stash-grid" aria-label="Tracks"></div>
+    <aside class="inspect" id="inspect" aria-live="polite">
+      <p class="inspect-k">INSPECT</p>
+      <p class="inspect-empty">Hover or focus an item to inspect it.</p>
+    </aside>
+  </div>
+</section>
+
+<!-- ═══════════ DOSSIER ═══════════ -->
+<section id="dossier" class="section dossier">
+  <header class="sec-head">
+    <p class="sec-num">03</p>
+    <h2 class="sec-title" data-scramble>DOSSIER</h2>
+  </header>
+  <div class="dossier-grid">
+    <div class="operator">
+      <div class="operator-photo">
+        <img src="/assets/img/operator.png" alt="Pixel-art operator on the cargo elevator extract" width="480" height="480" loading="lazy">
+        <span class="stamp">OPERATOR</span>
+      </div>
+      <dl class="operator-fields">
+        <div><dt>Callsign</dt><dd>exfilcamper01</dd></div>
+        <div><dt>Alias</dt><dd>zero</dd></div>
+        <div><dt>Sound</dt><dd>Dark dubstep · Riddim · Darkstep</dd></div>
+        <div><dt>First upload</dt><dd>28 Nov 2023</dd></div>
+        <div><dt>Frequencies</dt><dd><a href="https://soundcloud.com/cargoelevatorclutch" target="_blank" rel="noopener">SC/exfilcamper01</a> · <a href="https://soundcloud.com/iamzeroofficial" target="_blank" rel="noopener">SC/zero</a></dd></div>
+      </dl>
+    </div>
+    <div class="bio">
+      <p class="bio-lede reveal">Dark, sinister dubstep written for the moment the raid goes wrong.</p>
+      <p class="reveal">exfilcamper01 makes riddim and darkstep that come straight off the screen. Hours sunk into Escape from Tarkov: the dead-quiet corridor, footsteps you can't place, an extract timer bleeding out while your gear is worth more than your life. That dread gets pressed into the low end.</p>
+      <p class="reveal">Heavy, cold, and built for headphones. The drops hit like a breach charge and the space between them is left uncomfortably empty on purpose.</p>
+      <p class="reveal">The project also runs as <b>zero</b>, “born of the black wretch.” Two tracks are out in the wild. The rest are still in the stash.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ INTEL / BLOG ═══════════ -->
+<section id="intel" class="section intel">
+  <header class="sec-head">
+    <p class="sec-num">04</p>
+    <h2 class="sec-title" data-scramble>INTEL</h2>
+    <p class="sec-sub">Field reports: the stories behind the tracks. The music keeps playing while you read.</p>
+  </header>
+  <div class="intel-list" id="intel-list"></div>
+</section>
+
+<!-- ═══════════ COMMS / CONTACT ═══════════ -->
+<section id="comms" class="section comms">
+  <header class="sec-head">
+    <p class="sec-num">05</p>
+    <h2 class="sec-title" data-scramble>COMMS</h2>
+    <p class="sec-sub">Bookings, collabs, remix requests, or just tell me what raid you ran it in.</p>
+  </header>
+  <div class="comms-grid">
+    <a class="comm big" href="mailto:brandon@digitalhorizon.dev?subject=exfilcamper01%20%E2%80%94%20">
+      <span class="comm-k">EMAIL</span><span class="comm-v">brandon@digitalhorizon.dev</span><span class="comm-go">↗</span>
+    </a>
+    <a class="comm" href="tel:+17752378898">
+      <span class="comm-k">PHONE</span><span class="comm-v">(775) 237-8898</span><span class="comm-go">↗</span>
+    </a>
+    <a class="comm" href="https://soundcloud.com/cargoelevatorclutch" target="_blank" rel="noopener">
+      <span class="comm-k">SOUNDCLOUD</span><span class="comm-v">exfilcamper01</span><span class="comm-go">↗</span>
+    </a>
+    <a class="comm" href="https://soundcloud.com/iamzeroofficial" target="_blank" rel="noopener">
+      <span class="comm-k">SOUNDCLOUD</span><span class="comm-v">zero</span><span class="comm-go">↗</span>
+    </a>
+    <a class="comm" href="https://soundcloud.com/cargoelevatorclutch" target="_blank" rel="noopener">
+      <span class="comm-k">DISCORD</span><span class="comm-v">DM me on SoundCloud for the invite</span><span class="comm-go">↗</span>
+    </a>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>© <span id="yr">2026</span> exfilcamper01. Music streams via SoundCloud.</p>
+  <p class="foot-small">Escape from Tarkov is a trademark of Battlestate Games. This is a fan-inspired music project, not affiliated with or endorsed by Battlestate Games.</p>
+</footer>
+
+<!-- ═══════════ EXTRACT OVERLAY ═══════════ -->
+<div id="extract" class="extract" role="dialog" aria-modal="true" aria-labelledby="extract-title" hidden>
+  <div class="extract-inner">
+    <p class="extract-k">EXFIL REACHED</p>
+    <h2 id="extract-title" class="extract-title">EXTRACTED</h2>
+    <p class="extract-sub">Survived · <b id="extract-time">3:24</b> in raid · <b id="extract-count">1</b> raids survived</p>
+    <div class="extract-actions">
+      <button class="x-btn primary" id="x-next">NEXT RAID ▸ <span id="x-next-title"></span></button>
+      <button class="x-btn" id="x-again">RE-DEPLOY</button>
+      <a class="x-btn" id="x-follow" href="https://soundcloud.com/cargoelevatorclutch" target="_blank" rel="noopener">FOLLOW ON SOUNDCLOUD ↗</a>
+    </div>
+    <button class="linkish" id="x-close">close</button>
+  </div>
+</div>
+
+<!-- ═══════════ INTEL READER ═══════════ -->
+<div id="reader" class="reader" role="dialog" aria-modal="true" aria-label="Field report" hidden>
+  <div class="reader-panel">
+    <button class="reader-close" id="reader-close" aria-label="Close report">✕ CLOSE</button>
+    <div class="reader-body" id="reader-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<!-- SoundCloud widget: the actual audio source. Kept rendered (not display:none) so the widget works. -->
+<div class="sc-host" id="sc-host">
+  <iframe id="sc-frame" title="SoundCloud player" allow="autoplay; encrypted-media" scrolling="no" frameborder="no"
+    src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1676139921&amp;auto_play=false&amp;show_artwork=false&amp;visual=false&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;show_teaser=false&amp;color=%238ee03a"></iframe>
+</div>
+
+<div class="grain" aria-hidden="true"></div>
+
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script src="/assets/js/vendor/gsap.min.js"></script>
+<script src="/assets/js/vendor/ScrollTrigger.min.js"></script>
+<script src="/assets/js/vendor/ScrambleTextPlugin.min.js"></script>
+<script src="/assets/data/tracks.js"></script>
+<script src="/assets/data/intel.js"></script>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

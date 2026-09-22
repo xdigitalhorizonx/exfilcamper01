@@ -1,0 +1,7 @@
+{
+  "cleanUrls": false,
+  "headers": [
+    { "source": "/assets/(fonts|video|img)/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/assets/(css|js|data)/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }] }
+  ]
+}
