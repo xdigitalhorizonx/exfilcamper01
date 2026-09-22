@@ -334,21 +334,51 @@
   })();
 
   /* ─────────── STASH ─────────── */
-  let inspected = null;
+  // Tracks are fixed 3x3 items. Loot is decoration the visitor can drag into any free slot (positions saved in this browser).
+  const LOOT = [
+    { id: 'mask', k: 'mask', w: 2, h: 2, name: 'Welding mask “УБЕЙ”', line: 'Same mask as the guy in the hero. The sticker says “KILL”.' },
+    { id: 'ledx1', k: 'ledx', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'Worth more than your whole kit. Don’t die with it.' },
+    { id: 'ledx2', k: 'ledx', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'A second one. Somebody had a good raid.' },
+    { id: 'btc1', k: 'btc', w: 1, h: 1, name: 'Physical bitcoin', line: 'The only thing climbing faster than the BPM.' },
+    { id: 'btc2', k: 'btc', w: 1, h: 1, name: 'Physical bitcoin', line: 'Stacking.' },
+    { id: 'ammo1', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+    { id: 'ammo2', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+    { id: 'ammo3', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+  ];
+  const LAYOUTS = {
+    wide: { cols: 10, rows: 4, tracks: [[1, 1], [5, 2]], loot: { mask: [8, 1], ledx1: [10, 1], ledx2: [10, 2], btc1: [8, 3], btc2: [9, 3], ammo1: [4, 1], ammo2: [4, 2], ammo3: [4, 3] } },
+    narrow: { cols: 6, rows: 6, tracks: [[1, 1], [4, 2]], loot: { mask: [1, 5], ledx1: [4, 1], ledx2: [5, 1], btc1: [6, 1], btc2: [1, 4], ammo1: [2, 4], ammo2: [3, 4], ammo3: [3, 5] } },
+  };
+  let inspected = null, layoutKey = null, lootPos = {};
+  const layout = () => LAYOUTS[layoutKey];
+  const loadLoot = () => { try { const s = JSON.parse(localStorage.getItem('ec_loot_' + layoutKey)); if (s && LOOT.every(l => Array.isArray(s[l.id]))) return s; } catch {} return { ...layout().loot }; };
+  const saveLoot = () => { try { localStorage.setItem('ec_loot_' + layoutKey, JSON.stringify(lootPos)); } catch {} };
+  // every cell covered by something other than `skip`
+  function occupied(skip) {
+    const occ = new Set(), L = layout();
+    L.tracks.slice(0, TRACKS.length).forEach(([c, r]) => { for (let x = 0; x < 3; x++) for (let y = 0; y < 3; y++) occ.add(`${c + x},${r + y}`); });
+    LOOT.forEach(l => { if (l.id === skip) return; const [c, r] = lootPos[l.id]; for (let x = 0; x < l.w; x++) for (let y = 0; y < l.h; y++) occ.add(`${c + x},${r + y}`); });
+    return occ;
+  }
+  const fits = (l, c, r) => { const L = layout(); if (c < 1 || r < 1 || c + l.w - 1 > L.cols || r + l.h - 1 > L.rows) return false; const occ = occupied(l.id); for (let x = 0; x < l.w; x++) for (let y = 0; y < l.h; y++) if (occ.has(`${c + x},${r + y}`)) return false; return true; };
+
   function renderStash() {
     const grid = $('#stash-grid');
     const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length || 10;
-    const rows = 4;
-    const places = cols >= 10 ? [[1, 1], [5, 2]] : [[1, 1], [4, 2]];
-    const taken = new Set();
+    const key = cols >= 10 ? 'wide' : 'narrow';
+    if (key !== layoutKey) { layoutKey = key; lootPos = loadLoot(); }
+    const L = layout();
     let html = '';
+    for (let r = 1; r <= L.rows; r++) for (let c = 1; c <= L.cols; c++) html += `<span class="cell" data-c="${c}" data-r="${r}" style="grid-column:${c};grid-row:${r}" aria-hidden="true"></span>`;
     TRACKS.forEach((t, i) => {
-      const [c, r] = places[i] || [1, 1 + i * 3];
-      for (let dx = 0; dx < 3; dx++) for (let dy = 0; dy < 3; dy++) taken.add(`${c + dx},${r + dy}`);
+      const [c, r] = L.tracks[i] || [1, 1 + i * 3];
       html += `<button class="item${i === st.idx ? ' current' : ''}" style="grid-column:${c}/span 3;grid-row:${r}/span 3" data-i="${i}" aria-label="Play ${t.title}">
         <img src="${t.art}" alt="" loading="lazy"><span class="item-tag">${i === st.idx ? 'PLAYING' : 'PLAY'}</span><span class="item-dur">${fmt(t.duration)}</span><span class="item-name">${t.title}</span></button>`;
     });
-    for (let r = 1; r <= rows; r++) for (let c = 1; c <= cols; c++) if (!taken.has(`${c},${r}`)) html += `<span class="cell" style="grid-column:${c};grid-row:${r}" aria-hidden="true"></span>`;
+    LOOT.forEach(l => {
+      const [c, r] = lootPos[l.id];
+      html += `<div class="loot" data-id="${l.id}" style="grid-column:${c}/span ${l.w};grid-row:${r}/span ${l.h}" tabindex="0" role="img" aria-label="${l.name} (drag to move)"><img src="/assets/img/loot/${l.k}.png" alt="" draggable="false"></div>`;
+    });
     grid.innerHTML = html;
     $('#stash-count').textContent = TRACKS.length;
     $$('.item', grid).forEach(b => {
@@ -357,6 +387,46 @@
       b.addEventListener('mouseenter', () => renderInspect(i));
       b.addEventListener('focus', () => renderInspect(i));
     });
+    $$('.loot', grid).forEach(el => {
+      const l = LOOT.find(x => x.id === el.dataset.id);
+      el.addEventListener('mouseenter', () => renderLootInspect(l));
+      el.addEventListener('focus', () => renderLootInspect(l));
+      el.addEventListener('pointerdown', e => startDrag(e, el, l));
+    });
+  }
+
+  // drag loot between free slots (mouse + touch)
+  function startDrag(e, el, l) {
+    if (e.button > 0) return;
+    e.preventDefault(); renderLootInspect(l);
+    const grid = $('#stash-grid'), cell = $('.cell', grid).getBoundingClientRect(), gap = parseFloat(getComputedStyle(grid).columnGap) || 3;
+    const pitchX = cell.width + gap, pitchY = cell.height + gap;
+    const box = el.getBoundingClientRect();
+    const grabX = Math.min(l.w - 1, Math.floor((e.clientX - box.left) / pitchX)), grabY = Math.min(l.h - 1, Math.floor((e.clientY - box.top) / pitchY));
+    const x0 = e.clientX, y0 = e.clientY; let target = null, moved = false;
+    el.setPointerCapture(e.pointerId); el.classList.add('dragging');
+    const mark = () => { $$('.cell.ok,.cell.bad', grid).forEach(c => c.classList.remove('ok', 'bad')); if (!target) return; const ok = fits(l, target[0], target[1]);
+      for (let x = 0; x < l.w; x++) for (let y = 0; y < l.h; y++) { const c = $(`.cell[data-c="${target[0] + x}"][data-r="${target[1] + y}"]`, grid); c && c.classList.add(ok ? 'ok' : 'bad'); } };
+    const move = ev => {
+      const dx = ev.clientX - x0, dy = ev.clientY - y0; if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+      el.style.transform = `translate(${dx}px,${dy}px)`;
+      const g = cell, first = $('.cell[data-c="1"][data-r="1"]', grid).getBoundingClientRect();
+      const c = Math.floor((ev.clientX - first.left) / pitchX) + 1 - grabX, r = Math.floor((ev.clientY - first.top) / pitchY) + 1 - grabY;
+      target = [c, r]; mark();
+    };
+    const up = () => {
+      el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up);
+      el.classList.remove('dragging'); el.style.transform = '';
+      if (moved && target && fits(l, target[0], target[1])) { lootPos[l.id] = target; saveLoot(); el.style.gridColumn = `${target[0]}/span ${l.w}`; el.style.gridRow = `${target[1]}/span ${l.h}`;
+        if (hasGsap && !reduced) gsap.fromTo(el, { scale: 1.15 }, { scale: 1, duration: .25, ease: 'back.out(3)' }); }
+      target = null; mark();
+    };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  }
+  function renderLootInspect(l) {
+    inspected = null;
+    $('#inspect').innerHTML = `<p class="inspect-k">INSPECT</p><div class="loot-inspect"><img src="/assets/img/loot/${l.k}.png" alt=""></div><h3>${l.name}</h3>
+      <p class="note">${l.line}</p><p class="asof">Not a track, just loot. Drag it to any free slot.</p>`;
   }
   function renderInspect(i) {
     if (i == null) return; inspected = i; const t = TRACKS[i];
@@ -420,7 +490,7 @@
     $$('[data-scramble]').forEach(h => ScrollTrigger.create({ trigger: h, start: 'top 85%', once: true,
       onEnter: () => gsap.to(h, { duration: 1, scrambleText: { text: h.textContent, chars: 'upperCase', revealDelay: .2, speed: .5 } }) }));
     ScrollTrigger.batch('.reveal', { start: 'top 95%', once: true, onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .06, duration: .6, ease: 'expo.out' }) });
-    ScrollTrigger.create({ trigger: '#stash', start: 'top 75%', once: true, onEnter: () => gsap.from('#stash-grid .item', { scale: .7, autoAlpha: 0, stagger: .15, duration: .7, ease: 'back.out(2)' }) });
+    ScrollTrigger.create({ trigger: '#stash', start: 'top 75%', once: true, onEnter: () => gsap.from('#stash-grid .item, #stash-grid .loot', { scale: .7, autoAlpha: 0, stagger: .06, duration: .6, ease: 'back.out(2)', clearProps: 'transform,opacity,visibility' }) });
     gsap.to('#raid .raid-grid', { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '#raid', start: 'top top', end: 'bottom top', scrub: true } });
     gsap.from('.comm', { y: 30, autoAlpha: 0, stagger: .06, duration: .7, ease: 'expo.out', scrollTrigger: { trigger: '#comms', start: 'top 75%' } });
     gsap.from('.operator', { x: -40, autoAlpha: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '#dossier', start: 'top 70%' } });
