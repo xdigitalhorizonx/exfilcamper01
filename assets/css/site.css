@@ -154,7 +154,7 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 .ticker-track em{font-style:normal;color:var(--blood)}
 
 /* ═══════ SECTIONS ═══════ */
-.section{padding:clamp(80px,12vw,150px) var(--gut);position:relative}
+.section{padding:clamp(64px,8vw,110px) var(--gut);position:relative}
 .sec-head{display:grid;grid-template-columns:auto 1fr;column-gap:20px;align-items:end;margin-bottom:clamp(32px,5vw,56px);max-width:1400px}
 .sec-num{font-size:.8rem;letter-spacing:.3em;color:var(--exfil);margin:0 0 .9em;grid-row:1}
 .sec-title{font-family:var(--display);font-weight:900;font-size:clamp(4rem,14vw,11rem);line-height:.78;margin:0;letter-spacing:-.01em;grid-row:1}
@@ -286,7 +286,7 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
   .hud-follow{display:none}
   .raid-right .readout:first-child{grid-column:1/-1}
   .readout-v{font-size:2.6rem}
-  .raid{padding-bottom:96px}
+  .raid{padding-bottom:120px}
   .deck{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:60;border-width:1px 0 0;background:rgba(7,8,10,.94);grid-template-columns:auto 1fr;gap:4px 12px;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
   .deck .btn-icon,.deck .btn-impact,.deck .vol,.deck .sc-attr{display:none}
   .deck .btn-play{width:44px;height:44px}
