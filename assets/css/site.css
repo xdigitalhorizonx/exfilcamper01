@@ -79,7 +79,7 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 /* ═══════ RAID HERO ═══════ */
 .raid{position:relative;z-index:5;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:90px var(--gut) 28px;overflow:hidden;isolation:isolate}
 .raid-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%;z-index:-3;image-rendering:pixelated;
-  filter:brightness(.66) contrast(1.05);transform:scale(1.02);transform-origin:50% 65%}
+  filter:brightness(.82) contrast(1.06);transform:scale(1.02);transform-origin:50% 65%}
 .raid-flash{position:absolute;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse at 50% 60%,rgba(142,224,58,.22),transparent 60%);opacity:0;will-change:opacity}
 #viz{position:absolute;inset:0;width:100%;height:100%;z-index:-2}
 .raid-vignette{position:absolute;inset:0;z-index:-1;pointer-events:none;
@@ -174,9 +174,11 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 .item.current{border-color:var(--exfil);box-shadow:inset 0 0 0 1px var(--exfil)}
 .item.current .item-tag{background:var(--blood);color:#fff}
 .item{z-index:2}
-.loot{z-index:3;position:relative;display:grid;place-items:center;padding:6%;border:1px solid #2c3326;background:radial-gradient(circle at 50% 40%,rgba(217,213,195,.07),rgba(0,0,0,.25));cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:border-color .15s}
+.loot{z-index:3;position:relative;display:grid;place-items:center;padding:10% 6% 8%;border:1px solid #3a3f38;background:linear-gradient(rgba(255,255,255,.04),rgba(0,0,0,.2)),#1b1e1b;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:border-color .15s}
 .loot img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
 .loot:hover,.loot:focus-visible{border-color:var(--bone)}
+.loot-name{position:absolute;top:2px;right:4px;font-size:clamp(.5rem,.9vw,.66rem);letter-spacing:.04em;color:#e4e1d3;text-shadow:0 1px 2px #000;pointer-events:none}
+.loot-count{position:absolute;bottom:2px;right:4px;font-size:clamp(.5rem,.9vw,.66rem);color:#e4e1d3;text-shadow:0 1px 2px #000;pointer-events:none}
 .loot.dragging{cursor:grabbing;z-index:20;border-color:var(--exfil);box-shadow:0 10px 30px rgba(0,0,0,.6);transition:none}
 .cell.ok{background:rgba(142,224,58,.28);border-color:var(--exfil)}
 .cell.bad{background:rgba(255,58,42,.28);border-color:var(--blood)}

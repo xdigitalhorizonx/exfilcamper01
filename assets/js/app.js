@@ -228,7 +228,7 @@
     const d = 1, r = raid.getBoundingClientRect();
     VW = r.width; VH = r.height; viz.width = VW * d; viz.height = VH * d; vx.setTransform(d, 0, 0, d, 0, 0);
     // ring frames the operator in the background video (focal point fx/fy of the 16:9 source, object-fit:cover, object-position 50% 60%)
-    const FX = .51, FY = .64, sw = 16, sh = 9, sc = Math.max(VW / sw, VH / sh) * 1.02;
+    const FX = .5, FY = .58, sw = 16, sh = 9, sc = Math.max(VW / sw, VH / sh) * 1.02;
     const dw = sw * sc, dh = sh * sc, ox = (VW - dw) * .5, oy = (VH - dh) * .6;
     cx = ox + FX * dw; cy = oy + FY * dh; R = Math.min(VW, VH) * (VW < 760 ? .2 : .15);
   }
@@ -336,14 +336,14 @@
   /* ─────────── STASH ─────────── */
   // Tracks are fixed 3x3 items. Loot is decoration the visitor can drag into any free slot (positions saved in this browser).
   const LOOT = [
-    { id: 'mask', k: 'mask', w: 2, h: 2, name: 'Welding mask “УБЕЙ”', line: 'Same mask as the guy in the hero. The sticker says “KILL”.' },
-    { id: 'ledx1', k: 'ledx', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'Worth more than your whole kit. Don’t die with it.' },
-    { id: 'ledx2', k: 'ledx', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'A second one. Somebody had a good raid.' },
-    { id: 'btc1', k: 'btc', w: 1, h: 1, name: 'Physical bitcoin', line: 'The only thing climbing faster than the BPM.' },
-    { id: 'btc2', k: 'btc', w: 1, h: 1, name: 'Physical bitcoin', line: 'Stacking.' },
-    { id: 'ammo1', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
-    { id: 'ammo2', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
-    { id: 'ammo3', k: 'ammo', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+    { id: 'mask', k: 'mask-v2', short: 'UBEY', count: '40/40', w: 2, h: 2, name: 'Welding mask “УБЕЙ”', line: 'Same mask as the guy in the hero. The sticker says “KILL”.' },
+    { id: 'ledx1', k: 'ledx-v2', short: 'LEDX', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'Worth more than your whole kit. Don’t die with it.' },
+    { id: 'ledx2', k: 'ledx-v2', short: 'LEDX', w: 1, h: 1, name: 'LEDX skin transilluminator', line: 'A second one. Somebody had a good raid.' },
+    { id: 'btc1', k: 'btc', short: 'BTC', w: 1, h: 1, name: 'Physical bitcoin', line: 'The only thing climbing faster than the BPM.' },
+    { id: 'btc2', k: 'btc', short: 'BTC', w: 1, h: 1, name: 'Physical bitcoin', line: 'Stacking.' },
+    { id: 'ammo1', k: 'ammo-v2', short: 'M993', count: '20', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+    { id: 'ammo2', k: 'ammo-v2', short: 'M993', count: '20', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
+    { id: 'ammo3', k: 'ammo-v2', short: 'M993', count: '20', w: 1, h: 1, name: '7.62x51 M993 (20 rds)', line: 'Armor-piercing. Much like the low end.' },
   ];
   const LAYOUTS = {
     wide: { cols: 10, rows: 4, tracks: [[1, 1], [5, 2]], loot: { mask: [8, 1], ledx1: [10, 1], ledx2: [10, 2], btc1: [8, 3], btc2: [9, 3], ammo1: [4, 1], ammo2: [4, 2], ammo3: [4, 3] } },
@@ -377,7 +377,7 @@
     });
     LOOT.forEach(l => {
       const [c, r] = lootPos[l.id];
-      html += `<div class="loot" data-id="${l.id}" style="grid-column:${c}/span ${l.w};grid-row:${r}/span ${l.h}" tabindex="0" role="img" aria-label="${l.name} (drag to move)"><img src="/assets/img/loot/${l.k}.png" alt="" draggable="false"></div>`;
+      html += `<div class="loot" data-id="${l.id}" style="grid-column:${c}/span ${l.w};grid-row:${r}/span ${l.h}" tabindex="0" role="img" aria-label="${l.name} (drag to move)"><img src="/assets/img/loot/${l.k}.png" alt="" draggable="false"><span class="loot-name">${l.short}</span>${l.count ? `<span class="loot-count">${l.count}</span>` : ''}</div>`;
     });
     grid.innerHTML = html;
     $('#stash-count').textContent = TRACKS.length;
