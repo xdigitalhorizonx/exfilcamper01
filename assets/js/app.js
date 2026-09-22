@@ -225,14 +225,15 @@
   let VW = 0, VH = 0, cx = 0, cy = 0, R = 0;
   const embers = Array.from({ length: reduced ? 30 : 110 }, () => ({ x: Math.random(), y: Math.random(), z: .3 + Math.random() * .7, s: Math.random() }));
   function sizeViz() {
-    const d = Math.min(devicePixelRatio || 1, 2), r = raid.getBoundingClientRect();
+    const d = 1, r = raid.getBoundingClientRect();
     VW = r.width; VH = r.height; viz.width = VW * d; viz.height = VH * d; vx.setTransform(d, 0, 0, d, 0, 0);
     // ring frames the operator in the background video (focal point fx/fy of the 16:9 source, object-fit:cover, object-position 50% 60%)
     const FX = .5, FY = .69, sw = 16, sh = 9, sc = Math.max(VW / sw, VH / sh) * 1.02;
     const dw = sw * sc, dh = sh * sc, ox = (VW - dw) * .5, oy = (VH - dh) * .6;
     cx = ox + FX * dw; cy = oy + FY * dh; R = Math.min(VW, VH) * (VW < 760 ? .2 : .15);
   }
-  let rot = 0, lastT = performance.now(), lastState = '';
+  let idleDrawn = false, scrubIdle = false, rot = 0, lastT = performance.now(), lastState = '', lastAmp = '', lastHit = '';
+  const flash = $('#raid-flash'), txt = (el, v) => { if (el.textContent !== v) el.textContent = v; };
   function frame(now) {
     const dt = Math.min(50, now - lastT) / 16.67; lastT = now;
     const t = cur(), p = pos();
@@ -241,24 +242,26 @@
     const tr = st.playing ? sampleAt(t.trans, p) : 0;
     st.amp += (a - st.amp) * .35;
     st.hit = Math.max(st.hit * Math.pow(.86, dt), tr);
-    root.style.setProperty('--amp', st.amp.toFixed(3));
-    root.style.setProperty('--hit', reduced ? 0 : st.hit.toFixed(3));
+    const ampS = st.amp.toFixed(2), hitS = reduced ? '0' : st.hit.toFixed(2);
+    if (ampS !== lastAmp) { raid.style.setProperty('--amp', ampS); lastAmp = ampS; }
+    if (hitS !== lastHit) { raid.style.setProperty('--hit', hitS); flash.style.opacity = hitS; lastHit = hitS; }
     if (!reduced && st.hit > .45) { raid.classList.add('shake'); raid.style.setProperty('--sx', Math.random() > .5 ? 1 : -1); raid.style.setProperty('--sy', Math.random() > .5 ? 1 : -1); }
     else raid.classList.remove('shake');
 
     // readouts
     const left = dur() - p;
-    $('#raid-timer').textContent = fmt2(left);
+    txt($('#raid-timer'), fmt2(left));
     $('#raid-bar').style.transform = `scaleX(${left / dur()})`;
     raid.classList.toggle('low-time', st.playing && left < 30000);
-    $('#t-cur').textContent = fmt(p);
+    txt($('#t-cur'), fmt(p));
     const stateTxt = st.playing ? 'NOW PLAYING' : st.deployed ? (p >= dur() - 300 ? 'FINISHED' : 'PAUSED') : 'READY';
     if (stateTxt !== lastState) { lastState = stateTxt; $('#now-state').textContent = stateTxt; }
     const ni = t.impacts.findIndex(i => i > p);
-    $('#next-impact').textContent = ni >= 0 ? `#${String(ni + 1).padStart(2, '0')} in ${fmt(t.impacts[ni] - p)}` : (t.impacts.length ? 'done' : '—');
+    txt($('#next-impact'), ni >= 0 ? `#${String(ni + 1).padStart(2, '0')} in ${fmt(t.impacts[ni] - p)}` : (t.impacts.length ? 'done' : '—'));
 
-    if (heroVisible) drawViz(t, p, dt);
-    drawScrub(false);
+    const busy = st.playing || st.hit > .01 || dragging || hoverX >= 0;
+    if (heroVisible && (busy || !idleDrawn)) { drawViz(t, p, dt); idleDrawn = !busy; }
+    if (busy || !scrubIdle) { drawScrub(false); scrubIdle = !busy; }
     ticker && ticker.timeScale(1 + st.amp * 3 + st.hit * 4);
     requestAnimationFrame(frame);
   }
