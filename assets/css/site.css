@@ -12,6 +12,7 @@
   --gut:clamp(16px,4vw,56px);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:72px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--bone);font-family:var(--mono);font-size:16px;line-height:1.6;overflow-x:hidden}
 body.is-gated{overflow:hidden}
@@ -68,11 +69,14 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 .nav a{text-decoration:none;color:var(--dim);transition:color .2s}
 .nav a i{font-style:normal;color:var(--exfil-d);margin-right:6px}
 .nav a:hover,.nav a.on{color:var(--bone)}
-.hud-stats{display:flex;gap:16px;color:var(--faint)}
-.hud-stats b{color:var(--exfil);font-weight:600}
+.hud-follow{color:#ff7a1a;text-decoration:none;letter-spacing:.14em}
+.hud-follow:hover{text-decoration:underline}
+.hero-follow{display:inline-block;margin-top:16px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#ff7a1a;text-decoration:none;border-bottom:1px solid rgba(255,122,26,.4);padding-bottom:2px}
+.hero-follow:hover{border-color:#ff7a1a}
+.deck-now{color:var(--bone);font-weight:600;max-width:22ch;overflow:hidden;text-overflow:ellipsis}
 
 /* ═══════ RAID HERO ═══════ */
-.raid{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:90px var(--gut) 28px;overflow:hidden;isolation:isolate}
+.raid{position:relative;z-index:5;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:90px var(--gut) 28px;overflow:hidden;isolation:isolate}
 .raid-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%;z-index:-3;image-rendering:pixelated;
   filter:brightness(calc(.62 + var(--hit) * .55)) saturate(calc(1 + var(--amp) * .5)) contrast(1.05);transform:scale(calc(1.02 + var(--hit) * .02));transform-origin:50% 65%}
 #viz{position:absolute;inset:0;width:100%;height:100%;z-index:-2}
@@ -216,7 +220,7 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 .comm.big{grid-column:1/-1;padding:clamp(24px,4vw,44px)}
 .comm-k{font-size:.7rem;letter-spacing:.3em;color:var(--exfil)}
 .comm-v{font-size:1rem;overflow-wrap:anywhere}
-.comm.big .comm-v{font-family:var(--display);font-weight:900;font-size:clamp(1.8rem,5.5vw,5rem);line-height:.95;text-transform:uppercase}
+.comm.big .comm-v{font-size:clamp(1.15rem,2.4vw,1.8rem);font-weight:600;color:var(--bone)}
 .comm-go{position:absolute;top:16px;right:18px;color:var(--dim)}
 
 .foot{padding:40px var(--gut) 120px;border-top:1px solid var(--line);color:var(--faint);font-size:.8rem}
@@ -265,7 +269,6 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 
 /* ═══════ RESPONSIVE ═══════ */
 @media (max-width:1100px){
-  .hud-stats{display:none}
   .raid-grid{grid-template-columns:1fr minmax(200px,320px)}
   .raid-right{grid-column:1/-1;justify-self:stretch;grid-template-columns:repeat(3,1fr)}
   .stash-wrap{grid-template-columns:1fr}
@@ -280,17 +283,16 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
   .raid-core{min-height:34svh}
   .raid-title{font-size:clamp(3rem,15vw,5rem)}
   .raid-right{grid-template-columns:1fr 1fr;gap:12px}
+  .hud-follow{display:none}
   .raid-right .readout:first-child{grid-column:1/-1}
   .readout-v{font-size:2.6rem}
-  .deck{grid-template-columns:1fr;gap:10px;padding:12px}
-  .deck-controls{justify-content:space-between}
-  .deck-meta{justify-content:space-between;flex-wrap:wrap;gap:8px 12px}
-  .vol{display:none}
-  .deck.mini{padding:8px 12px}
-  .deck.mini .deck-meta,.deck.mini .btn-impact{display:none}
-  .deck.mini{grid-template-columns:auto 1fr}
-  .deck.mini .btn-icon{display:none}
-  .deck.mini .btn-play{width:44px;height:44px}
+  .raid{padding-bottom:96px}
+  .deck{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:60;border-width:1px 0 0;background:rgba(7,8,10,.94);grid-template-columns:auto 1fr;gap:4px 12px;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+  .deck .btn-icon,.deck .btn-impact,.deck .vol,.deck .sc-attr{display:none}
+  .deck .btn-play{width:44px;height:44px}
+  .deck .scrub{height:34px}
+  .deck-meta{grid-column:1/-1;order:-1;justify-content:space-between;font-size:.72rem}
+  .foot{padding-bottom:140px}
   .stash-grid{--cell:calc((100vw - 32px - 20px - 15px) / 6);grid-template-columns:repeat(6,var(--cell))}
   .dossier-grid{grid-template-columns:1fr}
   .post{grid-template-columns:1fr;gap:8px}
@@ -303,3 +305,21 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
   .deploy:not(:disabled){animation:none}
   html{scroll-behavior:auto}
 }
+
+@media (hover:none){.gate-hint kbd,.gate-hint .k-enter{display:none}}
+
+/* easter egg: pastel mode (artist's personal palette) */
+body.pastel{--bg:#f7f9fc;--bg2:#eef3fb;--panel:#ffffff;--line:#dde6f3;--line2:#c9d6ea;--bone:#1b2233;--dim:#5b6780;--faint:#8f9ab0;--exfil:#7fb8ff;--exfil-d:#9cc8ff;--blood:#ff8fc2;--amber:#ffb3d6}
+body.pastel .hud{background:linear-gradient(#f7f9fcee,#f7f9fc00)} body.pastel .hud.solid{background:rgba(247,249,252,.95)}
+body.pastel .raid-bg{filter:brightness(1.1) saturate(.35) hue-rotate(160deg)}
+body.pastel .raid-vignette{background:linear-gradient(90deg,rgba(247,249,252,.9) 0%,rgba(247,249,252,.3) 34%,transparent 50%,rgba(247,249,252,.3) 66%,rgba(247,249,252,.88) 100%),linear-gradient(transparent 62%,var(--bg))}
+body.pastel .deck,body.pastel .deck.mini{background:rgba(255,255,255,.9)} body.pastel .btn-play{color:#fff}
+body.pastel .grain{opacity:.03}
+body.pastel .cell{background:repeating-linear-gradient(45deg,#f1f5fb 0 6px,#eaf0f9 6px 12px);border-color:#e1e8f3}
+body.pastel .stash-grid{background:#f4f7fc}
+
+/* blog title card, in the style of an Evangelion episode card */
+.eva-card{margin:26px 0 30px;padding:34px 0 30px;border-block:1px solid var(--line2)}
+.eva-card .ep{font-family:"Times New Roman",Times,serif;font-weight:700;font-size:1.3rem;letter-spacing:.02em;color:var(--bone);margin:0 0 6px;transform:scaleX(.82);transform-origin:left}
+.eva-card h1{font-family:"Times New Roman",Times,serif!important;font-weight:900!important;text-transform:none!important;font-size:clamp(3rem,9vw,5.6rem)!important;line-height:.9!important;letter-spacing:-.02em;transform:scaleX(.78);transform-origin:left;margin:0!important;width:128%}
+.eva-card .sub{font-family:"Times New Roman",Times,serif;font-size:1.1rem;color:var(--dim);margin:12px 0 0;transform:scaleX(.85);transform-origin:left}

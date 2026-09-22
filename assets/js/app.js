@@ -1,4 +1,4 @@
-/* exfilcamper01 — raid player
+/* exfilcamper01 — site player
    Audio: SoundCloud Widget API (the real stream). Visuals: driven by SoundCloud's own waveform
    data for the playing track, synced to the widget's reported playback position. */
 (() => {
@@ -26,20 +26,9 @@
     t.norm = s.map(v => clamp((v - lo) / (hi - lo || 1)));
     // transient = how far this sample rises above the recent past (kick/snare-ish hits)
     t.trans = t.norm.map((v, i) => { const p = (t.norm[i - 1] ?? v) * .5 + (t.norm[i - 2] ?? v) * .3 + (t.norm[i - 3] ?? v) * .2; return clamp((v - p) * 4); });
-    t.impacts = Array.isArray(t.drops) ? t.drops.map(x => x * 1000) : detectImpacts(t);
+    // drop markers only from artist-supplied times: auto-detection on SoundCloud's (heavily compressed) waveform proved unreliable
+    t.impacts = Array.isArray(t.drops) ? t.drops.map(x => x * 1000) : [];
   });
-  // Impact = biggest sustained energy jumps (2s after vs 2s before), >10s in, 15s apart, max 5.
-  function detectImpacts(t) {
-    const s = t.waveform, n = s.length, sps = n / (t.duration / 1000), w = Math.round(2 * sps);
-    const avg = (a, b) => { a = Math.max(0, a); b = Math.min(n, b); let x = 0; for (let i = a; i < b; i++) x += s[i]; return x / Math.max(1, b - a); };
-    const c = [];
-    for (let i = w; i < n - w; i++) { const b = avg(i - w, i), a = avg(i, i + w); if (a - b >= 15 && a >= 85 && i / sps > 10) c.push([a - b, i]); }
-    c.sort((x, y) => y[0] - x[0]);
-    const out = [];
-    for (const [, i] of c) { if (out.every(o => Math.abs(o - i) > sps * 15)) out.push(i); if (out.length === 5) break; }
-    return out.sort((a, b) => a - b).map(i => Math.round(i / sps * 1000));
-  }
-
   /* ─────────── state ─────────── */
   const st = { idx: 0, pos: 0, posAt: performance.now(), playing: false, ready: false, deployed: false, widget: null, amp: 0, hit: 0, wantPlay: false };
   const cur = () => TRACKS[st.idx];
@@ -47,19 +36,12 @@
   const pos = () => clamp(st.playing ? st.pos + (performance.now() - st.posAt) : st.pos, 0, dur());
   const sampleAt = (arr, ms) => { const f = ms / dur() * (arr.length - 1); const i = Math.floor(f), r = f - i; return (arr[i] ?? 0) * (1 - r) + (arr[i + 1] ?? arr[i] ?? 0) * r; };
 
-  /* local listening stats — this browser only */
-  const stats = (() => { try { return JSON.parse(localStorage.getItem('ec_stats')) || { raids: 0, secs: 0 }; } catch { return { raids: 0, secs: 0 }; } })();
-  const saveStats = () => { try { localStorage.setItem('ec_stats', JSON.stringify(stats)); } catch {} renderStats(); };
-  const renderStats = () => { $('#stat-raids').textContent = stats.raids; $('#stat-time').textContent = hms(stats.secs); };
-  renderStats();
-  setInterval(() => { if (st.playing && !document.hidden) { stats.secs++; if (stats.secs % 5 === 0) saveStats(); else renderStats(); } }, 1000);
-
   /* ─────────── GATE ─────────── */
   const gate = $('#gate'), deployBtn = $('#deploy');
   const step = (name, ok = true, v) => { const li = $(`.gate-log [data-step="${name}"]`); if (!li) return; li.classList.add(ok ? 'ok' : 'fail'); $('.v', li).textContent = v || (ok ? 'OK' : 'SLOW'); };
   (function clock() { const d = new Date(); $('#gate-clock').textContent = d.toTimeString().slice(0, 8); if (!st.deployed) setTimeout(clock, 1000); })();
   document.fonts?.ready.then(() => step('fonts'));
-  if (TRACKS.length) step('intel', true, `${TRACKS.length} TRACKS`);
+  if (TRACKS.length) step('intel', true, `${TRACKS.length} READY`);
   const linkTimeout = setTimeout(() => { if (!st.ready) { step('link', false, 'WAITING'); deployBtn.disabled = false; } }, 6000);
 
   // gate static noise
@@ -103,7 +85,7 @@
 
   function audioFallback() {
     $('#sc-host').classList.add('show');
-    toast('Your browser held the audio back. Hit play on the SoundCloud player to start the raid.', 9000);
+    toast('Your browser held the audio back. Hit play on the SoundCloud player to start the track.', 9000);
   }
   function toast(msg, ms = 4000) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => (t.hidden = true), ms); }
 
@@ -134,7 +116,7 @@
     w.bind(E.PAUSE, () => { st.pos = pos(); st.playing = false; document.body.classList.remove('playing'); $('#btn-play').setAttribute('aria-label', 'Play'); });
     w.bind(E.PLAY_PROGRESS, e => { st.pos = e.currentPosition; st.posAt = performance.now(); if (!st.playing && st.deployed) { st.playing = true; document.body.classList.add('playing'); } });
     w.bind(E.SEEK, e => { st.pos = e.currentPosition; st.posAt = performance.now(); });
-    w.bind(E.FINISH, () => { st.playing = false; st.pos = dur(); document.body.classList.remove('playing'); stats.raids++; saveStats(); showExtract(); });
+    w.bind(E.FINISH, () => { st.playing = false; st.pos = dur(); document.body.classList.remove('playing'); showExtract(); });
   }
   function refreshLiveStats() {
     st.widget?.getCurrentSound(s => {
@@ -189,14 +171,16 @@
     $('#now-credit').textContent = t.credit;
     $('#now-account').textContent = t.account;
     $('#now-art').src = t.art; $('#now-art').alt = `Artwork for ${t.title}`;
-    $('#now-tags').innerHTML = t.tags.map(x => `<li>${x}</li>`).join('');
+    $('#now-tags').innerHTML = t.tags.slice(0, 3).map(x => `<li>${x}</li>`).join('');
     $('#now-plays').textContent = t.plays.toLocaleString();
     $('#now-likes').textContent = t.likes.toLocaleString();
     $('#t-dur').textContent = fmt(t.duration);
     $('#sc-link').href = t.url;
-    $('#btn-impact').disabled = !t.impacts.length;
+    $('#btn-impact').hidden = !t.impacts.length; $('#impact-readout').hidden = !t.impacts.length;
+    $('#deck-now').textContent = t.title;
+    $('#hero-follow').href = t.account.startsWith('zero') ? 'https://soundcloud.com/iamzeroofficial' : 'https://soundcloud.com/cargoelevatorclutch';
     $('#scrub-markers').innerHTML = t.impacts.map((ms, k) =>
-      `<button class="mark" style="left:${ms / t.duration * 100}%" data-ms="${ms}" aria-label="Skip to impact ${k + 1} at ${fmt(ms)}"><span>IMPACT ${String(k + 1).padStart(2, '0')}</span></button>`).join('');
+      `<button class="mark" style="left:${ms / t.duration * 100}%" data-ms="${ms}" aria-label="Skip to drop ${k + 1} at ${fmt(ms)}"><span>DROP ${k + 1}</span></button>`).join('');
     $$('#scrub-markers .mark').forEach(m => m.addEventListener('click', e => { e.stopPropagation(); seek(+m.dataset.ms - 2000); }));
     drawScrub(true);
   }
@@ -268,10 +252,10 @@
     $('#raid-bar').style.transform = `scaleX(${left / dur()})`;
     raid.classList.toggle('low-time', st.playing && left < 30000);
     $('#t-cur').textContent = fmt(p);
-    const stateTxt = st.playing ? 'IN RAID' : st.deployed ? (p >= dur() - 300 ? 'EXTRACTED' : 'HOLDING') : 'STANDING BY';
+    const stateTxt = st.playing ? 'NOW PLAYING' : st.deployed ? (p >= dur() - 300 ? 'FINISHED' : 'PAUSED') : 'READY';
     if (stateTxt !== lastState) { lastState = stateTxt; $('#now-state').textContent = stateTxt; }
     const ni = t.impacts.findIndex(i => i > p);
-    $('#next-impact').textContent = ni >= 0 ? `#${String(ni + 1).padStart(2, '0')} in ${fmt(t.impacts[ni] - p)}` : (t.impacts.length ? 'all cleared' : 'none detected');
+    $('#next-impact').textContent = ni >= 0 ? `#${String(ni + 1).padStart(2, '0')} in ${fmt(t.impacts[ni] - p)}` : (t.impacts.length ? 'done' : '—');
 
     if (heroVisible) drawViz(t, p, dt);
     drawScrub(false);
@@ -340,7 +324,7 @@
   /* ─────────── ticker (real titles + tags) ─────────── */
   let ticker = null;
   (() => {
-    const words = [...new Set(TRACKS.flatMap(t => [t.title, ...t.tags]))];
+    const words = [...new Set([...TRACKS.flatMap(t => [t.title, ...t.tags]), 'Breakdowns', 'Las Vegas 702', 'Emercamp Alliance'])];
     const html = words.map(w => `<span>${w}</span><em>✕</em>`).join('');
     const el = $('#ticker'); el.innerHTML = html + html + html + html;
     if (hasGsap && !reduced) { ticker = gsap.to(el, { xPercent: -50, duration: 40, ease: 'none', repeat: -1 }); }
@@ -351,15 +335,15 @@
   function renderStash() {
     const grid = $('#stash-grid');
     const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length || 10;
-    const rows = cols >= 10 ? 6 : 8;
-    const places = cols >= 10 ? [[1, 1], [5, 2]] : [[1, 1], [4, 3]];
+    const rows = 4;
+    const places = cols >= 10 ? [[1, 1], [5, 2]] : [[1, 1], [4, 2]];
     const taken = new Set();
     let html = '';
     TRACKS.forEach((t, i) => {
       const [c, r] = places[i] || [1, 1 + i * 3];
       for (let dx = 0; dx < 3; dx++) for (let dy = 0; dy < 3; dy++) taken.add(`${c + dx},${r + dy}`);
-      html += `<button class="item${i === st.idx ? ' current' : ''}" style="grid-column:${c}/span 3;grid-row:${r}/span 3" data-i="${i}" aria-label="Load ${t.title} into the raid">
-        <img src="${t.art}" alt="" loading="lazy"><span class="item-tag">${i === st.idx ? 'IN RAID' : 'LOAD'}</span><span class="item-dur">${fmt(t.duration)}</span><span class="item-name">${t.title}</span></button>`;
+      html += `<button class="item${i === st.idx ? ' current' : ''}" style="grid-column:${c}/span 3;grid-row:${r}/span 3" data-i="${i}" aria-label="Play ${t.title}">
+        <img src="${t.art}" alt="" loading="lazy"><span class="item-tag">${i === st.idx ? 'PLAYING' : 'PLAY'}</span><span class="item-dur">${fmt(t.duration)}</span><span class="item-name">${t.title}</span></button>`;
     });
     for (let r = 1; r <= rows; r++) for (let c = 1; c <= cols; c++) if (!taken.has(`${c},${r}`)) html += `<span class="cell" style="grid-column:${c};grid-row:${r}" aria-hidden="true"></span>`;
     grid.innerHTML = html;
@@ -377,9 +361,9 @@
     $('#inspect').innerHTML = `<p class="inspect-k">INSPECT</p><h3>${t.title}</h3>
       <dl><dt>Artist</dt><dd>${t.account}</dd><dt>Credit</dt><dd>${t.credit}</dd><dt>Length</dt><dd>${fmt(t.duration)}</dd>
       <dt>Released</dt><dd>${new Date(t.released + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</dd>
-      <dt>Plays</dt><dd>${t.plays.toLocaleString()}</dd><dt>Likes</dt><dd>${t.likes.toLocaleString()}</dd><dt>Impacts</dt><dd>${t.impacts.length || 'none detected'}</dd></dl>
+      <dt>Plays</dt><dd>${t.plays.toLocaleString()}</dd><dt>Likes</dt><dd>${t.likes.toLocaleString()}</dd></dl>
       ${t.note ? `<p class="note">“${t.note}”</p>` : ''}
-      <div class="inspect-actions"><button class="i-btn" data-load="${i}">▶ LOAD INTO RAID</button><a class="i-btn alt" href="${t.url}" target="_blank" rel="noopener">SOUNDCLOUD ↗</a></div>
+      <div class="inspect-actions"><button class="i-btn" data-load="${i}">▶ PLAY</button><a class="i-btn alt" href="${t.url}" target="_blank" rel="noopener">SOUNDCLOUD ↗</a></div>
       <p class="asof">Plays/likes: ${asof}</p>`;
     $('[data-load]', $('#inspect')).addEventListener('click', () => { if (!st.deployed) return deploy(); loadTrack(i, true); $('#raid').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }); });
   }
@@ -388,7 +372,7 @@
   $('#intel-list').innerHTML = INTEL.length ? INTEL.map(p => `<a class="post reveal" href="${p.href}" data-post>
       <span class="post-no">${p.no}</span>
       <span><h3 class="post-title">${p.title}</h3><p class="post-meta">${new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} · ${p.tag}</p><p class="post-excerpt">${p.excerpt}</p></span>
-      <span class="post-go">READ ▸</span></a>`).join('') : '<p class="sec-sub">No field reports yet.</p>';
+      <span class="post-go">READ ▸</span></a>`).join('') : '<p class="sec-sub">No posts yet.</p>';
   const reader = $('#reader');
   $$('[data-post]').forEach(a => a.addEventListener('click', async e => {
     if (e.metaKey || e.ctrlKey || e.shiftKey) return;
@@ -410,7 +394,7 @@
   function showExtract() {
     const next = TRACKS[(st.idx + 1) % TRACKS.length];
     $('#extract-time').textContent = fmt(dur());
-    $('#extract-count').textContent = stats.raids;
+    $('#extract-track').textContent = cur().title;
     $('#x-next-title').textContent = next.title;
     $('#x-follow').href = cur().account.startsWith('zero') ? 'https://soundcloud.com/iamzeroofficial' : 'https://soundcloud.com/cargoelevatorclutch';
     const x = $('#extract'); x.hidden = false; $('#x-next').focus();
@@ -432,7 +416,7 @@
   if (hasGsap && !reduced) {
     $$('[data-scramble]').forEach(h => ScrollTrigger.create({ trigger: h, start: 'top 85%', once: true,
       onEnter: () => gsap.to(h, { duration: 1, scrambleText: { text: h.textContent, chars: 'upperCase', revealDelay: .2, speed: .5 } }) }));
-    ScrollTrigger.batch('.reveal', { start: 'top 88%', once: true, onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .1, duration: .9, ease: 'expo.out' }) });
+    ScrollTrigger.batch('.reveal', { start: 'top 95%', once: true, onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .06, duration: .6, ease: 'expo.out' }) });
     ScrollTrigger.create({ trigger: '#stash', start: 'top 75%', once: true, onEnter: () => gsap.from('#stash-grid .item', { scale: .7, autoAlpha: 0, stagger: .15, duration: .7, ease: 'back.out(2)' }) });
     gsap.to('#raid .raid-grid', { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '#raid', start: 'top top', end: 'bottom top', scrub: true } });
     gsap.from('.comm', { y: 30, autoAlpha: 0, stagger: .06, duration: .7, ease: 'expo.out', scrollTrigger: { trigger: '#comms', start: 'top 75%' } });
@@ -444,6 +428,14 @@
   // solid HUD once past the hero top
   const hud = $('#hud');
   addEventListener('scroll', () => hud.classList.toggle('solid', scrollY > 80), { passive: true });
+
+  // easter egg: Konami code flips the site into the artist's personal pastel palette
+  const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let kx = 0;
+  addEventListener('keydown', e => {
+    kx = e.key === KONAMI[kx] ? kx + 1 : (e.key === KONAMI[0] ? 1 : 0);
+    if (kx === KONAMI.length) { kx = 0; const on = document.body.classList.toggle('pastel'); toast(on ? 'Pastel mode unlocked.' : 'Back to the dark.', 2500); }
+  });
 
   /* ─────────── boot ─────────── */
   try { const want = sessionStorage.getItem('ec_load'); if (want) { sessionStorage.removeItem('ec_load'); const i = TRACKS.findIndex(t => t.id === want); if (i > 0) { st.idx = i; $('#sc-frame').src = $('#sc-frame').src.replace(/tracks%2F\d+|tracks\/\d+/, `tracks/${TRACKS[i].scId}`).replace('api.soundcloud.com/tracks/1676139921', `api.soundcloud.com/tracks/${TRACKS[i].scId}`); } } } catch {}
