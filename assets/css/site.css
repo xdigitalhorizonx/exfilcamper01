@@ -73,7 +73,7 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 .hud-follow:hover{text-decoration:underline}
 .hero-follow{display:inline-block;margin-top:16px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#ff7a1a;text-decoration:none;border-bottom:1px solid rgba(255,122,26,.4);padding-bottom:2px}
 .hero-follow:hover{border-color:#ff7a1a}
-.hero-follow.discord{color:#8e9bff;border-color:rgba(142,155,255,.4);margin-left:18px}.hero-follow.discord:hover{border-color:#8e9bff}
+.hero-follow{margin-right:18px}.hero-follow.discord{color:#8e9bff;border-color:rgba(142,155,255,.4)}.hero-follow.discord:hover{border-color:#8e9bff}
 .comm.discord .comm-k{color:#8e9bff}
 .deck-now{color:var(--bone);font-weight:600;max-width:22ch;overflow:hidden;text-overflow:ellipsis}
 
