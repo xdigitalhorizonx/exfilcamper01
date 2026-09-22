@@ -228,7 +228,7 @@
     const d = 1, r = raid.getBoundingClientRect();
     VW = r.width; VH = r.height; viz.width = VW * d; viz.height = VH * d; vx.setTransform(d, 0, 0, d, 0, 0);
     // ring frames the operator in the background video (focal point fx/fy of the 16:9 source, object-fit:cover, object-position 50% 60%)
-    const FX = .51, FY = .66, sw = 16, sh = 9, sc = Math.max(VW / sw, VH / sh) * 1.02;
+    const FX = .51, FY = .64, sw = 16, sh = 9, sc = Math.max(VW / sw, VH / sh) * 1.02;
     const dw = sw * sc, dh = sh * sc, ox = (VW - dw) * .5, oy = (VH - dh) * .6;
     cx = ox + FX * dw; cy = oy + FY * dh; R = Math.min(VW, VH) * (VW < 760 ? .2 : .15);
   }
