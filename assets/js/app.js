@@ -272,7 +272,7 @@
     const busy = st.playing || st.hit > .01 || dragging || hoverX >= 0;
     if (heroVisible && (busy || !idleDrawn)) { drawViz(t, p, dt); idleDrawn = !busy; }
     if (busy || !scrubIdle) { drawScrub(false); scrubIdle = !busy; }
-    ticker && ticker.timeScale(1 + st.amp * 3 + st.hit * 4);
+    ticker && ticker.timeScale(1 + st.amp * 2.2 + st.hit * 3);
     requestAnimationFrame(frame);
   }
   function drawViz(t, p, dt) {
@@ -340,7 +340,7 @@
     const words = [...new Set([...TRACKS.flatMap(t => [t.title, ...t.tags]), 'Breakdowns', 'Las Vegas 702', 'Emercamp Alliance'])];
     const html = words.map(w => `<span>${w}</span><em>✕</em>`).join('');
     const el = $('#ticker'); el.innerHTML = html + html + html + html;
-    if (hasGsap && !reduced) { ticker = gsap.to(el, { xPercent: -50, duration: 40, ease: 'none', repeat: -1 }); }
+    if (hasGsap && !reduced) { ticker = gsap.to(el, { xPercent: -50, duration: 52, ease: 'none', repeat: -1 }); }
   })();
 
   /* ─────────── STASH ─────────── */
