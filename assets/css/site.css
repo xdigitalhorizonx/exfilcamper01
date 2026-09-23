@@ -238,6 +238,8 @@ kbd{font-family:var(--mono);font-size:.72em;border:1px solid var(--line2);paddin
 
 .foot{padding:40px var(--gut) 120px;border-top:1px solid var(--line);color:var(--faint);font-size:.8rem}
 .foot p{margin:0 0 6px} .foot-small{font-size:.7rem;max-width:80ch}
+.foot-credit a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--line2)}
+.foot-credit a:hover{color:var(--exfil);border-color:var(--exfil)}
 
 /* ═══════ EXTRACT ═══════ */
 .extract{position:fixed;inset:0;z-index:95;display:grid;place-items:center;background:radial-gradient(circle,rgba(20,40,6,.92),rgba(2,3,2,.97))}
