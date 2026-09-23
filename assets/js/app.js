@@ -171,7 +171,8 @@
     $('#now-credit').textContent = t.credit;
     $('#now-account').textContent = t.account;
     $('#now-art').src = t.art; $('#now-art').alt = `Artwork for ${t.title}`;
-    $('#now-tags').innerHTML = t.tags.filter(x => !/^(electronic|edm|melodic dubstep)$/i.test(x)).slice(0, 3).map(x => `<li>${x}</li>`).join('');
+    const tags = t.tags.filter(x => !/^(electronic|edm|melodic dubstep|dubstep)$/i.test(x)).slice(0, 3);
+    $('#now-tags').innerHTML = [...tags, t.genre || 'Dubstep'].map(x => `<li>${x}</li>`).join('');
     $('#now-plays').textContent = t.plays.toLocaleString();
     $('#now-likes').textContent = t.likes.toLocaleString();
     $('#t-dur').textContent = fmt(t.duration);
