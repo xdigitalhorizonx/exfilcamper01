@@ -6,7 +6,7 @@ window.INTEL = [
     no: "001",
     slug: "prepare-for-escape",
     href: "/intel/prepare-for-escape.html",
-    title: "Prepare for Escape",
+    title: "Hermedic Retake",
     date: "2026-09-22",
     tag: "Track breakdown",
     excerpt: "The remix that started the project, and the feeling of loading into a raid you might not walk out of."
