@@ -116,7 +116,10 @@
     w.bind(E.PAUSE, () => { st.pos = pos(); st.playing = false; document.body.classList.remove('playing'); $('#btn-play').setAttribute('aria-label', 'Play'); });
     w.bind(E.PLAY_PROGRESS, e => { st.pos = e.currentPosition; st.posAt = performance.now(); if (!st.playing && st.deployed) { st.playing = true; document.body.classList.add('playing'); } });
     w.bind(E.SEEK, e => { st.pos = e.currentPosition; st.posAt = performance.now(); });
-    w.bind(E.FINISH, () => { st.playing = false; st.pos = dur(); document.body.classList.remove('playing'); showExtract(); });
+    w.bind(E.FINISH, () => {
+      if (st.repeat) { st.pos = 0; st.posAt = performance.now(); w.seekTo(0); w.play(); return; }
+      st.playing = false; st.pos = dur(); document.body.classList.remove('playing'); showExtract();
+    });
   }
   function refreshLiveStats() {
     st.widget?.getCurrentSound(s => {
@@ -150,6 +153,11 @@
   $('#btn-next').addEventListener('click', () => loadTrack(st.idx + 1, true));
   $('#btn-prev').addEventListener('click', () => (pos() > 4000 ? seek(0) : loadTrack(st.idx - 1, true)));
   $('#btn-impact').addEventListener('click', nextImpact);
+  // repeat: loop the current track instead of showing the end screen (remembered in this browser)
+  st.repeat = (() => { try { return localStorage.getItem('ec_repeat') === '1'; } catch { return false; } })();
+  const setRepeat = on => { st.repeat = on; const b = $('#btn-repeat'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); try { localStorage.setItem('ec_repeat', on ? '1' : '0'); } catch {} };
+  setRepeat(st.repeat);
+  $('#btn-repeat').addEventListener('click', () => { setRepeat(!st.repeat); toast(st.repeat ? 'Repeat on: this track will loop.' : 'Repeat off.', 1800); });
   $('#vol').addEventListener('input', e => st.widget?.setVolume(+e.target.value));
   addEventListener('keydown', e => {
     if (!st.deployed || e.target.closest('input,textarea,[contenteditable]') || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -158,6 +166,7 @@
     else if (e.key === 'ArrowLeft' && !e.target.closest('.scrub')) seek(pos() - 10000);
     else if (e.key === 'd' || e.key === 'D') nextImpact();
     else if (e.key === 'n' || e.key === 'N') loadTrack(st.idx + 1, true);
+    else if (e.key === 'r' || e.key === 'R') $('#btn-repeat').click();
     else if (e.key === 'Escape') { closeReader(); hideExtract(); }
   });
 
