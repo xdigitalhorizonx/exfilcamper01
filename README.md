@@ -10,3 +10,5 @@ Static artist site. No build step. Deploys from `main` on Vercel.
 Local preview: `npx serve .`
 
 **Cache:** JS/CSS/data links in `index.html` carry `?v=<timestamp>` — bump it on every deploy (media files are cached for a year, so give changed images/videos a new filename instead).
+
+**Track pages:** `/singleplayergames` is generated from `index.html` by `python tools/make-feature-pages.py` (re-run after editing index.html). It opens with that track featured via `<body data-feature>`.

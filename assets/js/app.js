@@ -521,6 +521,8 @@
   });
 
   /* ─────────── boot ─────────── */
+  // per-track landing pages (/singleplayergames/) set data-feature on <body>; that track opens as the featured one
+  { const feat = document.body.dataset.feature; const i = feat ? TRACKS.findIndex(t => t.id === feat) : -1; if (i > 0) st.idx = i; }
   try { const want = sessionStorage.getItem('ec_load'); if (want) { sessionStorage.removeItem('ec_load'); const i = TRACKS.findIndex(t => t.id === want); if (i > 0) { st.idx = i; $('#sc-frame').src = $('#sc-frame').src.replace(/tracks%2F\d+|tracks\/\d+/, `tracks/${TRACKS[i].scId}`).replace('api.soundcloud.com/tracks/1676139921', `api.soundcloud.com/tracks/${TRACKS[i].scId}`); } } } catch {}
   $('#yr').textContent = new Date().getFullYear();
   renderNow(); renderStash(); renderInspect(st.idx);
