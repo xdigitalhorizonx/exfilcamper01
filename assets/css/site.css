@@ -338,3 +338,4 @@ body.pastel .stash-grid{background:#f4f7fc}
 .eva-card .ep{font-family:"Times New Roman",Times,serif;font-weight:700;font-size:1.3rem;letter-spacing:.02em;color:var(--bone);margin:0 0 6px;transform:scaleX(.82);transform-origin:left}
 .eva-card h1{font-family:"Times New Roman",Times,serif!important;font-weight:900!important;text-transform:none!important;font-size:clamp(3rem,9vw,5.6rem)!important;line-height:.9!important;letter-spacing:-.02em;transform:scaleX(.78);transform-origin:left;margin:0!important;width:128%}
 .eva-card .sub{font-family:"Times New Roman",Times,serif;font-size:1.1rem;color:var(--dim);margin:12px 0 0;transform:scaleX(.85);transform-origin:left}
+.hero-follow.video{color:#ff5a3c;border-color:rgba(255,90,60,.45)}.hero-follow.video:hover{border-color:#ff5a3c}
