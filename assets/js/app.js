@@ -189,6 +189,8 @@
     $('#btn-impact').hidden = !t.impacts.length; $('#impact-readout').hidden = !t.impacts.length;
     $('#deck-now').textContent = t.title;
     $('#hero-follow').href = t.account.startsWith('zero') ? 'https://soundcloud.com/iamzeroofficial' : 'https://soundcloud.com/cargoelevatorclutch';
+    const hv = $('#hero-video'); // "Watch the video" follows the loaded track; hidden for a track with no video page
+    if (hv) { if (t.video) hv.href = t.video; hv.hidden = !t.video; }
     $('#scrub-markers').innerHTML = t.impacts.map((ms, k) =>
       `<button class="mark" style="left:${ms / t.duration * 100}%" data-ms="${ms}" aria-label="Skip to drop ${k + 1} at ${fmt(ms)}"><span>DROP ${k + 1}</span></button>`).join('');
     $$('#scrub-markers .mark').forEach(m => m.addEventListener('click', e => { e.stopPropagation(); seek(+m.dataset.ms - 2000); }));
