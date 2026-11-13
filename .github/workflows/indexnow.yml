@@ -1,0 +1,80 @@
+# Tells search engines (Bing, Yandex, Seznam, Naver, Yep) about changed pages
+# via IndexNow. Runs after each successful Vercel production deploy,
+# and on demand (Actions > IndexNow > Run workflow; "all" resubmits every URL).
+# Key file: 6c64220c8fe85f82e65fad0a71e5e827.txt — keep it, or submissions get rejected.
+name: IndexNow
+
+on:
+  status:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "changed = only URLs changed since the last run; all = every URL in the sitemap"
+        type: choice
+        options: [changed, all]
+        default: changed
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+env:
+  INDEXNOW_HOST: www.geartogetyoufolded.llc
+  INDEXNOW_KEY: 6c64220c8fe85f82e65fad0a71e5e827
+  SITEMAP_URL: https://www.geartogetyoufolded.llc/sitemap.xml
+
+jobs:
+  submit:
+    if: >-
+      github.event_name != 'status' ||
+      (startsWith(github.event.context, 'Vercel') &&
+       github.event.state == 'success' &&
+       contains(github.event.branches.*.name, github.event.repository.default_branch))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts/indexnow.mjs
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Restore last submission state
+        uses: actions/cache/restore@v4
+        with:
+          path: .indexnow-state.json
+          key: indexnow-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: indexnow-state-
+
+      - name: Find last successful run
+        id: since
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          since=$(gh api "repos/${{ github.repository }}/actions/workflows/indexnow.yml/runs?status=success&per_page=1" \
+            --jq '.workflow_runs[0].run_started_at // empty' || true)
+          echo "value=$since" >> "$GITHUB_OUTPUT"
+
+      - name: Let the new deploy settle on the custom domain
+        if: github.event_name == 'status'
+        run: sleep 20
+
+      - name: Submit changed URLs
+        env:
+          MODE: ${{ inputs.mode || 'changed' }}
+          SINCE: ${{ steps.since.outputs.value }}
+        run: node .github/scripts/indexnow.mjs
+
+      - name: Save submission state
+        if: hashFiles('.indexnow-state.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .indexnow-state.json
+          key: indexnow-state-${{ github.run_id }}-${{ github.run_attempt }}
