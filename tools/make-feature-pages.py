@@ -9,7 +9,7 @@ SITE = 'https://www.geartogetyoufolded.llc'
 
 PAGES = [
     {'slug': 'singleplayergames', 'track': 'single-player-games', 'og': 'og-spg-v1.jpg',
-     'desc': 'Single Player Games by zero (exfilcamper01): dark, sinister riddim. Headphones on.'},
+     'desc': 'Single Player Games by zero (exfilcamper01): dark, sinister riddim. Play the track, read the stories behind the music, and get in touch. Headphones on.'},
 ]
 
 js = open(os.path.join(ROOT, 'assets/data/tracks.js'), encoding='utf8').read()
